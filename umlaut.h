@@ -1,8 +1,8 @@
 /****************************************************************
- *                          umlaut.h
+ *  umlaut.h
  *
  *	Autor: Michael R Bzdusek II
- *  Datum: 28.12.2017 2017(c)
+ *  Datum: 28.12.2017 Copyright © 2017
  *
  *	ASCII-Codes: DE.
  *  Umlaut::XX

@@ -1,8 +1,8 @@
 /****************************************************************
- *                      Besonderes.cpp
+ *  Besonderes.cpp
  *																
  *	Autor: Michael R Bzdusek II                           
- *  Datum: 28.12.2017 2017(c)                                   
+ *  Datum: 28.12.2017 Copyright © 2017
  *																
  *  Dieses Programm generiert zufällige Passwörter.
  *
@@ -17,9 +17,11 @@
 #include <cstdlib>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fstream>
+#include <limits>
 #include "umlaut.h"
 #include "Besonderes.h"
-#include <fstream>
+
 
 
 using namespace std;
@@ -31,12 +33,7 @@ static const char bad[] =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 "abcdefghijklmnopqrstuvwxyz";
 
-enum speichernFrage: char
-{
-    ja = 'j',
-    Ja = 'J',
-};
-
+enum speichernFrage: char { ja = 'j', Ja = 'J', };
 
 int badGrosse = sizeof(bad) - 1;
 int passwrtLaenge = 0;
@@ -44,8 +41,8 @@ int passwrtZahl = 0;
 char temp = ' ';
 
 // Menü
-string menTitel ("\t  Passwort Generator\n");
-string menSacheEins ("\t\tRegeln\n\n");
+string menTitel ("Passwort Generator\n");
+string menSacheEins ("Regeln\n\n");
 string menSacheZwei ("I)   Nur Nummern sind erlaubt.\n");
 string menSacheDrei ("II)  strg + c beendet das Programm\n\n");
 
@@ -67,9 +64,8 @@ string dateiWinZwei ("chten Sie die Ergebnisse speicheern? Ja/nein\n");
 string dateiWin = dateiWinNull + dateiWinEins + dateiWinZwei;
 
 
-// Ausgaben: Fehleraufgetreten
-string eingabeFehler ("Tut mir schrecklich leid aber die Eingabe stimmt nicht.\n");
-string programmSchl ("Das Programm wird geschlossen\n");
+// Nachrichten
+string eingabeFehler ("Die Eingabe stimmt nicht. Versuchen Sie es noch einmal\n");
 string speichernFehler ("Etwas ist schiefgelaufen! Der Datei kann nicht geöffnet werden\n");
 
 string speichWinFehler ("Etwas ist schiefgelaufen! Der Datei kann nicht ge"); // Windows 0 + 1 + 2
@@ -87,84 +83,43 @@ string erfolgWinZwei ("rter.txt wurde erfolgreich gespeichert!\n");
 string erfolgWin = erfolgWinNull + erfolgWinEins + erfolgWinZwei;
 
 
-// Linux/Mac oder Windows Ausgaben: Wiederholen
-string linuxMacOS ("\nMöchten Sie wiederholen?\n");
-
-string winOS ("\nM"); // Windows 1 + 2 + 3
-char winOSTwo = Umlaut::oe;
-string winOSThree ("chten Sie wiederholen?\n");
-string windows = winOS + winOSTwo + winOSThree;
-
-
 
 void Clearscreen()
 {
 	cout << string(100, '\n');
-}// Ende der Clearscreenfunktion
+}
 
-
-//Diese Funktion generiert die zufällige Passwörter.
 char zufallsZahlenGenerieren()
 {
     return bad[rand() % badGrosse];
-    
-}// Ende des ZufallZahlenGenerieren
-
+}
 
 void speichern(string passwrt)
 {
 	ofstream sammlung;
-    if (!sammlung)
-    {
-        cout << speichernFehler;
-        wiederholen();
-    }
+    if (!sammlung) { cerr << speichernFehler; hauptprogramm(); }
     
 	sammlung.open("Passwoerter.txt", ios::app);
 	sammlung << passwrt << endl;
 	sammlung.close();
-    //cout << erfolgWin;
-
-}// Ende der speichernfunktion
-
-void wiederholen()
-{
-    char ende;
-	cout << linuxMacOS;
-    //cout << windows;
-	cin  >> ende;
-	switch (ende)
-	{
-        case 'N':
-		case 'n': exit(0);
-			break;
-		case 'y':
-		case 'Y': Clearscreen();
-				  hauptprogramm();
-			break;
-		
-		default: 
-			cin.clear();
-			cin.ignore();
-			cout << eingabeFehler;
-				 wiederholen();
-	}// Ende der switchAussage
-
-}// Ende der wiederholenfunktion
-
+}
 
 int hauptprogramm()
 {
-	Clearscreen();
     while (true)
     {
         
         srand((unsigned)time(0));
         string passwrt;
         
+        int lenNull = int (menTitel.length());
+        int lenEins = int (menSacheEins.length());
+        
         cout << setfill('*') << setw(40) << "*" <<endl;
-        cout << menTitel
-             << menSacheEins
+        if (lenNull % 2 == 0) { menTitel += " "; }
+        if (lenEins % 2 == 0) { menSacheEins += " "; }
+        cout << setfill (' ') << setw((40/2) + lenNull/2) << menTitel
+             << setfill (' ') << setw((40/2) + lenEins/2) << menSacheEins
              << menSacheZwei
              << menSacheDrei;
 
@@ -172,47 +127,26 @@ int hauptprogramm()
         cin  >> passwrtLaenge;
 
 	// die eingabe prüfen.
-	if (cin.fail())
-	{
-		cin.clear();
-		cin.ignore();
-		cout << eingabeFehler 
-			 << programmSchl;
-		hauptprogramm();
-        
-	}// Ende der ifAussgabe
+        if (cin.fail())
+        { cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n'); cerr << eingabeFehler; hauptprogramm(); }
 
 	// zwei cout-aussagen wurden gemacht: windows und mac/linux systeme
-	cout << linuxMacOSFrage;
+        cout << linuxMacOSFrage;
 	//cout << winFrage;
-    cin  >> passwrtZahl;
+        cin  >> passwrtZahl;
 
 	// die eingabe prüfen
-	if (cin.fail())
-	{
-		cin.clear();
-		cin.ignore();
-		cout << eingabeFehler 
-			 << programmSchl;
-		hauptprogramm();
-
-	}// Ende des ifAussgabe
+        if (cin.fail())
+        { cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n'); cerr << eingabeFehler; hauptprogramm(); }
         
-    cout << dateiFrage;
-    cin >> temp;
+        cout << dateiFrage;
+        cin >> temp;
     
     // die eingabe prüfen
-    if (cin.fail())
-    {
-        cin.clear();
-        cin.ignore();
-        cout << eingabeFehler
-             << programmSchl;
-        hauptprogramm();
+        if (cin.fail())
+        { cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n'); cerr << eingabeFehler; hauptprogramm(); }
         
-    }// Ende des ifAussgabe
-        
-    cout.flush();
+        cout.flush();
         
         
         //Ausgabe
@@ -223,13 +157,7 @@ int hauptprogramm()
                 passwrt += zufallsZahlenGenerieren();
 			}// Ende des ifAussgabe
 			
-            
-            // Hier sollte doch ein Bool eingerichtet und geprüft: Speichen Ja oder nein
-			if (temp == ja)
-            {
-                speichern(passwrt);
-            }
-            
+			if (temp == ja) { speichern(passwrt); }
             
 			cout << passwrt << endl;
             passwrt = ""; //passwrt wurde gelöscht.
@@ -239,8 +167,8 @@ int hauptprogramm()
         
         cout << setfill('*') << setw(40) << "*" <<endl;
         cout << erfolg;
-        wiederholen();
+        hauptprogramm();
    
 	}// Ende des whileAussage
 
-}// Ende des Hauptprogramm
+}
